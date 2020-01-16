@@ -1,0 +1,98 @@
+﻿@page
+@using ToDoFinal.Models
+@model IndexModel
+@{
+    ViewData["Title"] = "My tasks";
+}
+
+<h4>@ViewData["Title"]</h4>
+
+<form method="post">
+    <button type="submit" class="btn btn-primary" asp-page-handler="Hide">@(Model.HideCompleted == 0 ? "Hide" : "Show") Completed Tasks</button>
+</form>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<ul class="list-unstyled">
+    @foreach (var task in Model.Tasks)
+    {
+        @if (task.Status == Status.Done && Model.HideCompleted == 1) { }
+        else
+        {
+            <li>
+                <form class="px-4 py-3" method="post">
+                    <div class="row">
+                        <h5>@task.Description</h5>
+                    </div>
+                    <div class="row">
+                        <div class="d-none">
+                            <input id="taskid-@task.Id" asp-for="Input.Id" class="form-control" type="hidden" value="@task.Id" />
+                        </div>
+                        <div class="col">
+                            <select id="priority-@task.Id" asp-for="Input.Priority" class="custom-select">
+                                <option value="0" selected=@(task.Priority==Priority.Low)>Low</option>
+                                <option value="1" selected=@(task.Priority==Priority.Medium)>Medium</option>
+                                <option value="2" selected=@(task.Priority==Priority.High)>High</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            @*<input id="dueDate-@task.Id" asp-for="Input.DueDate" type="datetime-local" class="form-control" value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" required>*@
+                            <div class="input-group date datetimepicker" id="datetimepicker-@task.Id" data-target-input="nearest">
+                                <input id="input-duedate-@task.Id" type="text" class="form-control datetimepicker-input" data-target="#datetimepicker-@task.Id" value="@task.DueDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")" asp-for="Input.DueDate" required/>
+                                <div class="input-group-append" data-target="#datetimepicker-@task.Id" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <select id="status-@task.Id" asp-for="Input.Status" class="custom-select">
+                                <option value="0" selected=@(task.Status==Status.New)>New</option>
+                                <option value="1" selected=@(task.Status==Status.Active)>Active</option>
+                                <option value="2" selected=@(task.Status==Status.Done)>Done</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" asp-page-handler="UpdateTask">Update</button>
+                    </div>
+                </form>
+            </li>
+        }
+    }
+</ul>
+
+
+<h4 class="mt-2">Add Task</h4>
+
+<form method="post">
+    <div class="row">
+        <div class="col">
+            @*no front end validation intentionally to test this events logging @@@@cs line 95 *@
+            <input asp-for="Input.Description" class="form-control" type="text" placeholder="Description" minlength="3" required />
+            <span asp-validation-for="Input.Description"></span><br />
+        </div>
+        <div class="col">
+            <select asp-for="Input.Priority" class="custom-select">
+                <option selected disabled>Priority</option>
+                <option value="0">Low</option>
+                <option value="1">Medium</option>
+                <option value="2">High</option>
+            </select>
+        </div>
+        <div class="col">
+            @*<input asp-for="Input.DueDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required>*@
+            <div class="input-group date" id="datetimepicker-add" data-target-input="nearest">
+                <input id="input-duedate-add" type="text" class="form-control datetimepicker-input" data-target="#datetimepicker-add" value="" asp-for="Input.DueDate" required />
+                <div class="input-group-append" data-target="#datetimepicker-add" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <button type="submit" class="btn btn-primary" asp-page-handler="AddTask">Add</button>
+        </div>
+    </div>
+</form>
+
+
+    @*<h1>Local time: @DateTime.Now</h1>
+
+    <h1>UTC: @DateTime.UtcNow</h1>
+    <h1>@TimeZoneInfo.Local.DisplayName</h1>*@
